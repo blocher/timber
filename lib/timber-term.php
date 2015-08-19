@@ -136,7 +136,11 @@ class TimberTerm extends TimberCore implements TimberCoreInterface {
 		if ( is_numeric($tid) ) {
 			$query = $wpdb->prepare("SELECT * FROM $wpdb->terms WHERE term_id = %d", $tid);
 		} else {
-			$query = $wpdb->prepare("SELECT * FROM $wpdb->terms WHERE slug = %s", $tid);
+			if (!isset($this->taxonomy)) {
+                $query = $wpdb->prepare("SELECT * FROM $wpdb->terms WHERE slug = %s and taxonomy", $tid);
+            } else {
+                $query = $wpdb->prepare("SELECT * FROM $wpdb->terms, $wpdb->term_taxonomy WHERE $wpdb->terms.slug = %s and $wpdb->term_taxonomy.taxonomy= %s AND $wpdb->term_taxonomy.term_id = $wpdb->terms.term_id", $tid, $this->taxonomy);
+            }
 		}
 		$result = $wpdb->get_row($query);
 		if ( isset($result->term_id) ) {
